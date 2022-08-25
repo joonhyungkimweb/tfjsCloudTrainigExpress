@@ -1,7 +1,6 @@
 import { parse, unparse, ParseConfig, ParseResult } from 'papaparse';
 
-export type ParsedCSVArray = number | string | null;
-export type UnheadedCSV = ParsedCSVArray[];
+export type UnheadedCSV = number[];
 
 const csvParser = (option: ParseConfig) => (blob: Blob | string) =>
   new Promise<ParseResult<UnheadedCSV>>((complete, error) => {
