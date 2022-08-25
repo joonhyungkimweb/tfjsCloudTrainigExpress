@@ -1,5 +1,4 @@
-import { parse, unparse, ParseConfig, ParseResult } from 'papaparse';
-
+import { parse, ParseConfig, ParseResult } from 'papaparse';
 export type UnheadedCSV = number[];
 
 const csvParser = (option: ParseConfig) => (blob: Blob | string) =>
