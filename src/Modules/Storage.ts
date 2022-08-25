@@ -1,4 +1,4 @@
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3';
 const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
 const client = new S3Client({
@@ -12,8 +12,17 @@ const commandGetObject = (filePath: string) =>
     Bucket: BucketName,
     Key: filePath,
   });
+const commandPutObject = (Key: string, file: string | Uint8Array | Buffer, ContentType?: string) =>
+  new PutObjectCommand({
+    Bucket: BucketName,
+    Key,
+    ContentType,
+    Body: file,
+  });
 
 export const getObject = (filePath: string) => client.send(commandGetObject(filePath));
+export const putObject = (...args: Parameters<typeof commandPutObject>) =>
+  client.send(commandPutObject(...args));
 
 export const generateGetURL = (filePath: string) =>
   getSignedUrl(client, commandGetObject(filePath), { expiresIn: 3600 });
