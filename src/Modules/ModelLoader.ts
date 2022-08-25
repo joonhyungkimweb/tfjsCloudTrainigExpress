@@ -1,4 +1,4 @@
-import { loadLayersModel, io } from '@tensorflow/tfjs-node';
+import { loadLayersModel, io } from '@tensorflow/tfjs-node-gpu';
 import { generateGetURL } from './Storage';
 
 export const LoadModel = async (modelPath: string, weightPath: string) => {

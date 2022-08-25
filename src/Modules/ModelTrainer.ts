@@ -1,4 +1,4 @@
-import { LayersModel, ModelCompileArgs, ModelFitArgs, Tensor } from '@tensorflow/tfjs-node';
+import { LayersModel, ModelCompileArgs, ModelFitArgs, Tensor } from '@tensorflow/tfjs-node-gpu';
 
 export const trainModel = (
   {
