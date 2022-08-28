@@ -52,4 +52,7 @@ node_modules/
 
 dist/
 
+docker/**
+!docker/Dockerfile
+
 .vscode/
