@@ -53,6 +53,6 @@ node_modules/
 dist/
 
 docker/**
-!docker/Dockerfile
+!docker/Dockerfile*
 
 .vscode/
