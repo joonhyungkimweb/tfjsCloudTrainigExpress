@@ -1,28 +1,19 @@
 import { io } from '@tensorflow/tfjs-core';
-import { putObject } from './Storage';
 
-export const createModelSaver = (userId: string, modelName: string): io.IOHandler => ({
+export const createModelSaver = (modelName: string): io.IOHandler => ({
   save: async (modelArtifacts) => {
-    await putObject(
-      `${userId}/models/${modelName}.json`,
-      JSON.stringify({
-        ...modelArtifacts,
-        weightsManifest: [
-          {
-            paths: [`./${modelName}.weights.bin`],
-            weights: modelArtifacts.weightSpecs,
-          },
-        ],
-      }),
-      'application/json'
-    );
+    const modelJSON = JSON.stringify({
+      ...modelArtifacts,
+      weightsManifest: [
+        {
+          paths: [`./${modelName}.weights.bin`],
+          weights: modelArtifacts.weightSpecs,
+        },
+      ],
+    });
 
     if (modelArtifacts.weightData != null) {
-      await putObject(
-        `${userId}/models/${modelName}.weights.bin`,
-        Buffer.from(modelArtifacts.weightData),
-        'application/octet-stream'
-      );
+      const modelWeights = Buffer.from(modelArtifacts.weightData);
     }
 
     return {
