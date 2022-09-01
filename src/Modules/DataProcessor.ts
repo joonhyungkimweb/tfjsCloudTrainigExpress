@@ -1,7 +1,8 @@
 import { parseCsvData, UnheadedCSV } from './CSVPaser';
 import { tensor } from '@tensorflow/tfjs-node-gpu';
+import { LocalFile } from 'papaparse';
 
-const loadCSVDataset = async (datasetFile: Blob) => {
+const loadCSVDataset = async (datasetFile: LocalFile) => {
   const {
     data: [, ...data],
   } = await parseCsvData(datasetFile);
@@ -13,7 +14,7 @@ const extractColumns = (dataSet: UnheadedCSV[], columns: number[]) =>
   dataSet.map((data) => data.filter((_, index) => isSelectedColumn(columns, index)));
 
 export const loadAndProcessCSVData = async (
-  datasetFile: Blob,
+  datasetFile: LocalFile,
   xColumns: number[],
   yColumns: number[]
 ) => {
