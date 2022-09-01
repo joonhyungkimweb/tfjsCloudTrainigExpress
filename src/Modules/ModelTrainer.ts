@@ -13,5 +13,5 @@ export const trainModel = (
   trainConfig: ModelFitArgs
 ) => {
   model.compile(compileConfig);
-  model.fit(xs, ys, trainConfig);
+  return model.fit(xs, ys, trainConfig);
 };
