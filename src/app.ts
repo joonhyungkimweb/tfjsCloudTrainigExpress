@@ -5,10 +5,12 @@ import { Readable } from 'stream';
 import { LoadModel } from './Modules/ModelLoader';
 import { trainModel } from './Modules/ModelTrainer';
 import { createModelSaver } from './Modules/ModelSaver';
+import cors from 'cors';
 
 const uplaod = multer({ storage: multer.memoryStorage() });
 
 const app: Express = express();
+app.use(cors());
 const port = process.env.PORT ?? 8080;
 
 type TrainingFileFields = 'dataFile' | 'modelFile' | 'weightFile';
