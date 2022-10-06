@@ -32,5 +32,5 @@ export const trainModel = async (
   trainConfig: ModelFitArgs
 ) => {
   model.compile(compileConfig);
-  await model.fit(xs, ys, trainConfig);
+  return model.fit(xs, ys, trainConfig);
 };
