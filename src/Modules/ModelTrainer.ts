@@ -1,6 +1,25 @@
-import { LayersModel, ModelCompileArgs, ModelFitArgs, Tensor } from '@tensorflow/tfjs-node-gpu';
+import {
+  LayersModel,
+  ModelCompileArgs,
+  ModelFitArgs,
+  Optimizer,
+  Tensor,
+  train,
+} from '@tensorflow/tfjs-node-gpu';
 
-export const trainModel = (
+const optimizers: { [key: string]: (learningRate: number) => Optimizer } = {
+  Adam: train.adam,
+  SGD: train.sgd,
+  Adagrad: train.adagrad,
+  Adadelta: train.adadelta,
+  Adamax: train.adamax,
+  RMSProp: train.rmsprop,
+};
+
+export const compileOptimizer = (optimzer: string, learningRate: number) =>
+  optimizers[optimzer](learningRate);
+
+export const trainModel = async (
   {
     xs,
     ys,
@@ -13,5 +32,5 @@ export const trainModel = (
   trainConfig: ModelFitArgs
 ) => {
   model.compile(compileConfig);
-  return model.fit(xs, ys, trainConfig);
+  await model.fit(xs, ys, trainConfig);
 };
