@@ -1,27 +1,31 @@
 import { io } from '@tensorflow/tfjs-core';
-import fs from 'fs';
+import { putObject } from './Storage';
 
-const MODEL_DIR = process.env.MODEL_DIR || 'models';
-
-export const createModelSaver = (userId: string, modelName: string): io.IOHandler => ({
+export const createModelSaver = (prefix: string, modelFileName: string): io.IOHandler => ({
   save: async (modelArtifacts) => {
-    const modelJSON = JSON.stringify({
-      ...modelArtifacts,
-      weightsManifest: [
-        {
-          paths: [`./${modelName}.weights.bin`],
-          weights: modelArtifacts.weightSpecs,
-        },
-      ],
-    });
+    const modelPath = `${prefix}/${modelFileName}.json`;
+    const weightsPath = `${prefix}/${modelFileName}.weights.bin`;
 
-    fs.mkdirSync(`${MODEL_DIR}/${userId}/models/`, { recursive: true });
-
-    fs.writeFileSync(`${MODEL_DIR}/${userId}/models/${modelName}.json`, modelJSON);
+    await putObject(
+      modelPath,
+      JSON.stringify({
+        ...modelArtifacts,
+        weightsManifest: [
+          {
+            paths: [`./${modelFileName}.weights.bin`],
+            weights: modelArtifacts.weightSpecs,
+          },
+        ],
+      }),
+      'application/json'
+    );
 
     if (modelArtifacts.weightData != null) {
-      const modelWeights = Buffer.from(modelArtifacts.weightData);
-      fs.writeFileSync(`${MODEL_DIR}/${userId}/models/${modelName}.weights.bin`, modelWeights);
+      await putObject(
+        weightsPath,
+        Buffer.from(modelArtifacts.weightData),
+        'application/octet-stream'
+      );
     }
 
     return {
