@@ -1,69 +1,33 @@
-import express, { Express, Request, Response } from 'express';
-import multer from 'multer';
+import express, { Express, json, Request, Response } from 'express';
 import { loadAndProcessCSVData } from './Modules/DataProcessor';
 import { Readable } from 'stream';
 import { LoadModel } from './Modules/ModelLoader';
 import { trainModel } from './Modules/ModelTrainer';
 import { createModelSaver } from './Modules/ModelSaver';
 import cors from 'cors';
-
-const uplaod = multer({ storage: multer.memoryStorage() });
+import { CSVParams, ImageParams, TrainingParams } from './@types/TrainingParams';
+import { onStart } from './Modules/DB';
+import { trainCSVModel } from './Modules/CSVTrainer';
+import { trainImageModel } from './Modules/ImageTrainer';
 
 const app: Express = express();
 app.use(cors());
+app.use(json());
 const port = process.env.PORT ?? 8080;
 
-type TrainingFileFields = 'dataFile' | 'modelFile' | 'weightFile';
-
-type TrainingFileBody = {
-  [fieldname in TrainingFileFields]: Express.Multer.File[];
-};
-
-app.post(
-  '/',
-  uplaod.fields([{ name: 'dataFile' }, { name: 'modelFile' }, { name: 'weightFile' }]),
-  async (req: Request, res: Response) => {
-    try {
-      const {
-        dataFile: [{ buffer: dataFileBuffer }],
-        modelFile: [{ buffer: modelFileBuffer }],
-        weightFile: [{ buffer: weightFileBuffer }],
-      } = req.files as TrainingFileBody;
-
-      const dataset = await loadAndProcessCSVData(
-        Readable.from(dataFileBuffer),
-        JSON.parse(req.body.xColumns),
-        JSON.parse(req.body.yColumns)
-      );
-
-      const model = await LoadModel(modelFileBuffer, weightFileBuffer);
-
-      const result = await trainModel(
-        dataset,
-        model,
-        {
-          optimizer: req.body.optimizer,
-          loss: req.body.loss,
-          metrics: req.body.metrics,
-        },
-        {
-          batchSize: +req.body.batchSize,
-          epochs: +req.body.epochs,
-          shuffle: JSON.parse(req.body.shuffle),
-          validationSplit: +req.body.validationSplit,
-        }
-      );
-
-      model.save(createModelSaver(req.body.userId, req.body.modelName));
-
-      res.send(JSON.stringify(result));
-    } catch (err) {
-      console.error(err);
-      res.status(500);
-      res.send((err as Error).message);
-    }
+app.post('/', async (req: Request<null, any, TrainingParams>, res: Response) => {
+  try {
+    if (req.body.type == null || (req.body.type !== 'csv' && req.body.type !== 'image'))
+      throw new Error('Invalid Data type');
+    res.status(200).send();
+    if (req.body.type === 'csv') await trainCSVModel(req.body as CSVParams);
+    if (req.body.type === 'image') await trainImageModel(req.body as ImageParams);
+  } catch (err) {
+    console.error(err);
+    res.status(500);
+    res.send((err as Error).message);
   }
-);
+});
 
 app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at https://localhost:${port}`);
