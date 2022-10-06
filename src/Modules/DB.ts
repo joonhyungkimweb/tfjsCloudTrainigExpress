@@ -4,13 +4,51 @@ import {
   AttributeValue,
   ScanCommand,
   GetItemCommand,
+  PutItemCommand,
 } from '@aws-sdk/client-dynamodb';
+import { TrainingParams } from '../@types/TrainingParams';
 
 const client = new DynamoDBClient({
   region: 'ap-northeast-2',
 });
 
 const TABLE_NAME = process.env.TABLE_NAME;
+
+const parseParam = (param: any): AttributeValue => {
+  if (typeof param === 'string') return { S: param };
+  if (typeof param === 'number') return { N: `${param}` };
+  if (Array.isArray(param)) return { L: param.map(parseParam) };
+  if (typeof param === 'object')
+    return {
+      M: Object.entries(param).reduce(
+        (acc, [key, value]) => ({ ...acc, [key]: parseParam(value) }),
+        {}
+      ),
+    };
+  if (typeof param === 'boolean') return { BOOL: param };
+  return { NULL: true };
+};
+
+const commandPut = <P extends TrainingParams>(params: P, trainingSeq: string) =>
+  new PutItemCommand({
+    TableName: TABLE_NAME,
+    Item: {
+      trainingSeq: {
+        S: trainingSeq,
+      },
+      status: { S: 'provisioning' },
+      history: { L: [] },
+      files: { L: [] },
+      errorMessage: { NULL: true },
+      startTime: { S: `${+new Date()}` },
+      finishTime: { NULL: true },
+      epochsDone: { N: '0' },
+      ...Object.entries(params).reduce(
+        (acc, [key, value]) => ({ ...acc, [key]: parseParam(value) }),
+        {}
+      ),
+    },
+  });
 
 const commandUpdate = (
   trainingSeq: string,
@@ -56,6 +94,9 @@ export const getStatus = async (trainingSeq: string) => {
   );
   return Item?.status.S;
 };
+
+export const onStart = <P extends TrainingParams>(params: P, trainingSeq: string) =>
+  client.send(commandPut(params, trainingSeq));
 
 export const onTraining = (
   trainingSeq: string,
