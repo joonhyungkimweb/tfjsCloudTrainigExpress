@@ -20,3 +20,9 @@ export interface CSVParams extends TrainingParams {
   xColumns: number[];
   yColumns: number[];
 }
+export interface ImageParams extends TrainingParams {
+  width: number;
+  height: number;
+  channel: number;
+  normalize: boolean;
+}
