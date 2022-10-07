@@ -41,7 +41,7 @@ const commandPut = <P extends TrainingParams>(params: P, trainingSeq: string) =>
       history: { L: [] },
       files: { L: [] },
       errorMessage: { NULL: true },
-      startTime: { S: `${+new Date()}` },
+      startTime: { N: `${+new Date()}` },
       finishTime: { NULL: true },
       epochsDone: { N: '0' },
       ...Object.entries(params).reduce(
