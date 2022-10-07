@@ -12,7 +12,8 @@ const client = new DynamoDBClient({
   region: 'ap-northeast-2',
 });
 
-const TABLE_NAME = process.env.TABLE_NAME;
+const TRAINING_TABLE = process.env.TRAINING_TABLE;
+const PROJEJCT_TABLE = process.env.PROJEJCT_TABLE;
 
 const parseParam = (param: any): AttributeValue => {
   if (typeof param === 'string') return { S: param };
@@ -31,7 +32,7 @@ const parseParam = (param: any): AttributeValue => {
 
 const commandPut = <P extends TrainingParams>(params: P, trainingSeq: string) =>
   new PutItemCommand({
-    TableName: TABLE_NAME,
+    TableName: TRAINING_TABLE,
     Item: {
       trainingSeq: {
         S: trainingSeq,
@@ -58,7 +59,7 @@ const commandUpdate = (
   setExpression?: string
 ) =>
   new UpdateItemCommand({
-    TableName: TABLE_NAME,
+    TableName: TRAINING_TABLE,
     Key: {
       trainingSeq: {
         S: trainingSeq,
@@ -69,10 +70,22 @@ const commandUpdate = (
     UpdateExpression: `SET #status = :status, ${setExpression}`,
   });
 
+const commandUpdateProject = (userId: string, projectName: string, trainingSeq: string) =>
+  new UpdateItemCommand({
+    Key: {
+      projectName: { S: projectName },
+      email: { S: userId },
+    },
+    ExpressionAttributeNames: { '#trainingSessions': 'trainingSessions' },
+    ExpressionAttributeValues: { ':trainingSeq': { L: [{ S: trainingSeq }] } },
+    UpdateExpression: `SET #trainingSessions = list_append(#trainingSessions, :trainingSeq)`,
+    TableName: PROJEJCT_TABLE,
+  });
+
 export const getParams = (instanceId: string) =>
   client.send(
     new ScanCommand({
-      TableName: TABLE_NAME,
+      TableName: TRAINING_TABLE,
       ExpressionAttributeNames: { '#instanceId': 'instanceId' },
       ExpressionAttributeValues: { ':instanceId': { S: instanceId } },
       FilterExpression: '#instanceId = :instanceId',
@@ -82,7 +95,7 @@ export const getParams = (instanceId: string) =>
 export const getStatus = async (trainingSeq: string) => {
   const { Item } = await client.send(
     new GetItemCommand({
-      TableName: TABLE_NAME,
+      TableName: TRAINING_TABLE,
       Key: {
         trainingSeq: {
           S: trainingSeq,
@@ -95,8 +108,10 @@ export const getStatus = async (trainingSeq: string) => {
   return Item?.status.S;
 };
 
-export const onStart = <P extends TrainingParams>(params: P, trainingSeq: string) =>
-  client.send(commandPut(params, trainingSeq));
+export const onStart = async <P extends TrainingParams>(params: P, trainingSeq: string) => {
+  await client.send(commandPut(params, trainingSeq));
+  await client.send(commandUpdateProject(params.userId, params.projectName, trainingSeq));
+};
 
 export const onTraining = (
   trainingSeq: string,
