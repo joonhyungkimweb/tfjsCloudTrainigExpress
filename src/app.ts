@@ -1,12 +1,6 @@
 import express, { Express, json, Request, Response } from 'express';
-import { loadAndProcessCSVData } from './Modules/DataProcessor';
-import { Readable } from 'stream';
-import { LoadModel } from './Modules/ModelLoader';
-import { trainModel } from './Modules/ModelTrainer';
-import { createModelSaver } from './Modules/ModelSaver';
 import cors from 'cors';
 import { CSVParams, ImageParams, TrainingParams } from './@types/TrainingParams';
-import { onStart } from './Modules/DB';
 import { trainCSVModel } from './Modules/CSVTrainer';
 import { trainImageModel } from './Modules/ImageTrainer';
 
@@ -27,6 +21,10 @@ app.post('/', async (req: Request<null, any, TrainingParams>, res: Response) => 
     res.status(500);
     res.send((err as Error).message);
   }
+});
+
+app.get('/', (_, res) => {
+  res.status(200).send();
 });
 
 app.listen(port, () => {
