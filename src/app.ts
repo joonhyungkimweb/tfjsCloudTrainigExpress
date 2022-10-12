@@ -18,6 +18,7 @@ app.post('/', async (req: Request<null, any, TrainingParams>, res: Response) => 
     if (req.body.type === 'image') await trainImageModel(req.body as ImageParams);
   } catch (err) {
     console.error(err);
+    console.log(new Date(), req.hostname);
     res.status(500);
     res.send((err as Error).message);
   }
