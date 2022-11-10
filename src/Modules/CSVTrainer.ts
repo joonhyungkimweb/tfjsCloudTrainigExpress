@@ -5,10 +5,8 @@ import { LoadModel } from './ModelLoader';
 import { createModelSaver } from './ModelSaver';
 import { compileOptimizer, trainModel } from './ModelTrainer';
 
-export const trainCSVModel = async (params: CSVParams) => {
-  const trainingSeq = `training-${+new Date()}`;
+export const trainCSVModel = async (params: CSVParams, trainingSeq: string) => {
   try {
-    await onStart(params, trainingSeq);
     const trainingDataset = await loadAndProcessCSVData(
       params.datasetPath,
       params.xColumns,

@@ -5,11 +5,8 @@ import { LoadModel } from './ModelLoader';
 import { createModelSaver } from './ModelSaver';
 import { compileOptimizer, trainModel } from './ModelTrainer';
 
-export const trainImageModel = async (params: ImageParams) => {
-  const trainingSeq = `training-${+new Date()}`;
-
+export const trainImageModel = async (params: ImageParams, trainingSeq: string) => {
   try {
-    await onStart(params, trainingSeq);
     const trainingDataset = await loadAndProcessImageData(
       params.datasetPath,
       params.width,
