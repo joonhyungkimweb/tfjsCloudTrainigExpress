@@ -13,7 +13,7 @@ const client = new DynamoDBClient({
 });
 
 const TRAINING_TABLE = process.env.TRAINING_TABLE;
-const PROJEJCT_TABLE = process.env.PROJEJCT_TABLE;
+const MODEL_TABLE = process.env.MODEL_TABLE;
 
 const parseParam = (param: any): AttributeValue => {
   if (typeof param === 'string') return { S: param };
@@ -70,16 +70,15 @@ const commandUpdate = (
     UpdateExpression: `SET #status = :status, ${setExpression}`,
   });
 
-const commandUpdateProject = (userId: string, projectName: string, trainingSeq: string) =>
+const commandUpdateModel = (userId: string, modelName: string, trainingSeq: string) =>
   new UpdateItemCommand({
     Key: {
-      projectName: { S: projectName },
       email: { S: userId },
     },
-    ExpressionAttributeNames: { '#trainingSessions': 'trainingSessions' },
+    ExpressionAttributeNames: { '#title': modelName, '#trainingSession': 'trainingSession' },
     ExpressionAttributeValues: { ':trainingSeq': { L: [{ S: trainingSeq }] } },
-    UpdateExpression: `SET #trainingSessions = list_append(#trainingSessions, :trainingSeq)`,
-    TableName: PROJEJCT_TABLE,
+    UpdateExpression: `SET models.#title.#trainingSession = :trainingSeq`,
+    TableName: MODEL_TABLE,
   });
 
 export const getParams = (instanceId: string) =>
@@ -110,7 +109,7 @@ export const getStatus = async (trainingSeq: string) => {
 
 export const onStart = async <P extends TrainingParams>(params: P, trainingSeq: string) => {
   await client.send(commandPut(params, trainingSeq));
-  await client.send(commandUpdateProject(params.userId, params.projectName, trainingSeq));
+  await client.send(commandUpdateModel(params.userId, params.modelName, trainingSeq));
 };
 
 export const onTraining = (

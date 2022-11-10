@@ -30,7 +30,7 @@ export const trainCSVModel = async (params: CSVParams) => {
         validationSplit: params.validationSplit,
         callbacks: {
           onEpochEnd: async (epoch, logs) => {
-            const prefix = `${params.userId}/trained-models/${params.projectName}/${trainingSeq}`;
+            const prefix = `${params.userId}/trained-models/${params.modelName}/${trainingSeq}`;
             const modelFileName = `${params.modelName}-epoch${epoch}`;
 
             const currentStatus = await getStatus(trainingSeq!);

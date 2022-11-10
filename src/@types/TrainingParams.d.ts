@@ -1,6 +1,5 @@
 export interface TrainingParams {
   userId: string;
-  projectName: string;
   modelName: string;
   type: 'image' | 'csv';
   datasetPath: string;
