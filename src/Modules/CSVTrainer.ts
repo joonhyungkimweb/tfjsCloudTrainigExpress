@@ -1,3 +1,4 @@
+import { dispose } from '@tensorflow/tfjs-node-gpu';
 import { CSVParams } from '../@types/TrainingParams';
 import { loadAndProcessCSVData } from './DataProcessor';
 import { getStatus, onError, onFinish, onStart, onTraining } from './DB';
@@ -13,11 +14,12 @@ export const trainCSVModel = async (params: CSVParams, trainingSeq: string) => {
       params.yColumns
     );
     const model = await LoadModel(params.modelPath, params.weightsPath);
-    const result = await trainModel(
+    const optimizer = compileOptimizer(params.optimizer, params.learningRate);
+    await trainModel(
       trainingDataset,
       model,
       {
-        optimizer: compileOptimizer(params.optimizer, params.learningRate),
+        optimizer,
         loss: params.loss,
         metrics: params.metrics,
       },
@@ -58,6 +60,9 @@ export const trainCSVModel = async (params: CSVParams, trainingSeq: string) => {
         },
       }
     );
+    model.dispose();
+    optimizer.dispose();
+    dispose(trainingDataset);
   } catch (error) {
     console.error(error);
     let message = 'Unknown Error';
