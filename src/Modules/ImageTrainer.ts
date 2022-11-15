@@ -1,3 +1,4 @@
+import { dispose } from '@tensorflow/tfjs-node-gpu';
 import { ImageParams } from '../@types/TrainingParams';
 import { getStatus, onError, onFinish, onProcessing, onTraining } from './DB';
 import { loadAndProcessImageData } from './ImageProcessor';
@@ -18,12 +19,13 @@ export const trainImageModel = async (params: ImageParams, trainingSeq: string) 
     );
 
     const model = await LoadModel(params.modelPath, params.weightsPath);
+    const optimizer = compileOptimizer(params.optimizer, params.learningRate);
 
-    const result = await trainModel(
+    await trainModel(
       trainingDataset,
       model,
       {
-        optimizer: compileOptimizer(params.optimizer, params.learningRate),
+        optimizer,
         loss: params.loss,
         metrics: params.metrics,
       },
@@ -62,6 +64,9 @@ export const trainImageModel = async (params: ImageParams, trainingSeq: string) 
         },
       }
     );
+    optimizer.dispose();
+    model.dispose();
+    dispose(trainingDataset);
   } catch (error) {
     console.error(error);
     let message = 'Unknown Error';

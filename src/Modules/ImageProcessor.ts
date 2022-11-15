@@ -1,5 +1,14 @@
 import { getObject } from './Storage';
-import { tensor, tidy, node, image, Tensor4D, stack, util } from '@tensorflow/tfjs-node-gpu';
+import {
+  tensor,
+  tidy,
+  node,
+  image,
+  Tensor4D,
+  stack,
+  util,
+  dispose,
+} from '@tensorflow/tfjs-node-gpu';
 import { Readable } from 'stream';
 
 const streamToBuffer = (stream: Readable) =>
@@ -59,13 +68,14 @@ export const loadAndProcessImageData = async (
 
   util.shuffle(imageList);
 
-  const xs = stack(
-    await Promise.all(
-      imageList.map(async (url) =>
-        convertCanvasToTensor(await loadImageFile(url), width, height, channel, normalize)
-      )
+  const loadedImages = await Promise.all(
+    imageList.map(async (url) =>
+      convertCanvasToTensor(await loadImageFile(url), width, height, channel, normalize)
     )
   );
+
+  const xs = stack(loadedImages);
+  dispose(loadedImages);
 
   const ys = tensor(
     makeOnehotLabels(
@@ -73,7 +83,6 @@ export const loadAndProcessImageData = async (
       imageList.map((url) => url.split('/').slice(-2)[0])
     )
   );
-
   return {
     xs,
     ys,
