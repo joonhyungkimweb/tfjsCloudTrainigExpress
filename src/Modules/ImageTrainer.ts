@@ -1,5 +1,5 @@
 import { ImageParams } from '../@types/TrainingParams';
-import { getStatus, onError, onFinish, onStart, onTraining } from './DB';
+import { getStatus, onError, onFinish, onProcessing, onTraining } from './DB';
 import { loadAndProcessImageData } from './ImageProcessor';
 import { LoadModel } from './ModelLoader';
 import { createModelSaver } from './ModelSaver';
@@ -7,6 +7,8 @@ import { compileOptimizer, trainModel } from './ModelTrainer';
 
 export const trainImageModel = async (params: ImageParams, trainingSeq: string) => {
   try {
+    await onProcessing(trainingSeq);
+
     const trainingDataset = await loadAndProcessImageData(
       params.datasetPath,
       params.width,

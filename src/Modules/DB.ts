@@ -53,7 +53,7 @@ const commandPut = <P extends TrainingParams>(params: P, trainingSeq: string) =>
 
 const commandUpdate = (
   trainingSeq: string,
-  status: 'training' | 'finished' | 'error',
+  status: 'preprocessing' | 'training' | 'finished' | 'error',
   keys?: Record<string, string>,
   values?: Record<string, AttributeValue>,
   setExpression?: string
@@ -67,7 +67,7 @@ const commandUpdate = (
     },
     ExpressionAttributeNames: { '#status': 'status', ...keys },
     ExpressionAttributeValues: { ':status': { S: status }, ...values },
-    UpdateExpression: `SET #status = :status, ${setExpression}`,
+    UpdateExpression: `SET #status = :status${setExpression == null ? '' : `, ${setExpression}`}`,
   });
 
 const commandUpdateModel = (userId: string, modelName: string, trainingSeq: string) =>
@@ -111,6 +111,9 @@ export const onStart = async <P extends TrainingParams>(params: P, trainingSeq: 
   await client.send(commandPut(params, trainingSeq));
   await client.send(commandUpdateModel(params.userId, params.modelName, trainingSeq));
 };
+
+export const onProcessing = (trainingSeq: string) =>
+  client.send(commandUpdate(trainingSeq, 'preprocessing'));
 
 export const onTraining = (
   trainingSeq: string,
