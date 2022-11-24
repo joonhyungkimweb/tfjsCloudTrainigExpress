@@ -83,3 +83,9 @@ export interface TrainingEpochParameters {
     fileSize: number;
   };
 }
+
+export interface CSVMetaData {
+  fileData: {
+    filepath: string;
+  };
+}
