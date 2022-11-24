@@ -1,26 +1,29 @@
 import { dispose } from '@tensorflow/tfjs-node-gpu';
-import { ImageParams } from '../@types/TrainingParams';
-import { getStatus, onError, onFinish, onProcessing, onTraining } from './DB';
+import { ImageParams, TrainingParametersWithDataType } from '../@types/TrainingParams';
+import { errorOnTrainingSession, startPreprocessing, startTrainningProcess } from './APICalls';
 import { loadAndProcessImageData } from './ImageProcessor';
 import { LoadModel } from './ModelLoader';
 import { createModelSaver } from './ModelSaver';
 import { compileOptimizer, trainModel } from './ModelTrainer';
+import { epochEndHandler, finishHandler } from './ModelTrainingCallBacks';
 
-export const trainImageModel = async (params: ImageParams, trainingSeq: string) => {
+export const trainImageModel = async (
+  id: number,
+  params: TrainingParametersWithDataType<'image'>
+) => {
   try {
-    await onProcessing(trainingSeq);
-
+    await startPreprocessing(id);
+    const { width, height, channel, normalize } = params.trainingOptions;
     const trainingDataset = await loadAndProcessImageData(
       params.datasetPath,
-      params.width,
-      params.height,
-      params.channel,
-      params.normalize
+      width,
+      height,
+      channel,
+      normalize
     );
-
     const model = await LoadModel(params.modelPath, params.weightsPath);
     const optimizer = compileOptimizer(params.optimizer, params.learningRate);
-
+    await startTrainningProcess(id);
     await trainModel(
       trainingDataset,
       model,
@@ -35,43 +38,18 @@ export const trainImageModel = async (params: ImageParams, trainingSeq: string) 
         shuffle: params.shuffle,
         validationSplit: params.validationSplit,
         callbacks: {
-          onEpochEnd: async (epoch, logs) => {
-            const prefix = `${params.userId}/trained-models/${params.modelName}/${trainingSeq}`;
-            const modelFileName = `${params.modelName}-epoch${epoch}`;
-            const currentStatus = await getStatus(trainingSeq);
-            if (currentStatus == null || currentStatus === 'stopped') return;
-            await model.save(createModelSaver(prefix, modelFileName));
-            await onTraining(
-              trainingSeq,
-              Object.entries(logs!).reduce(
-                (acc, [key, value]) => ({ ...acc, [key]: { N: `${value}` } }),
-                {}
-              ),
-              {
-                modelPath: {
-                  S: `${modelFileName}.json`,
-                },
-                weightsPath: {
-                  S: `${modelFileName}.weights.bin`,
-                },
-              },
-              epoch + 1
-            );
-          },
-          onTrainEnd: async () => {
-            await onFinish(trainingSeq);
-          },
+          onEpochEnd: epochEndHandler(id, params.userId, model),
+          onTrainEnd: finishHandler(id),
         },
       }
     );
-    optimizer.dispose();
     model.dispose();
+    optimizer.dispose();
     dispose(trainingDataset);
   } catch (error) {
     console.error(error);
     let message = 'Unknown Error';
     if (error instanceof Error) message = error.message;
-    if (trainingSeq == null) return;
-    await onError(trainingSeq, message);
+    await errorOnTrainingSession(id, message);
   }
 };
