@@ -19,11 +19,13 @@ export enum TrainingOptimizer {
   ADAMAX,
 }
 
-export interface CSVParams {
+type DataType = 'csv' | 'image';
+
+interface CSVParams {
   xColumns: number[];
   yColumns: number[];
 }
-export interface ImageParams {
+interface ImageParams {
   width: number;
   height: number;
   channel: number;
@@ -49,7 +51,13 @@ export interface TrainingRequestParameters extends TrainingParameters {
   modelPath: string;
   weightsPath: string;
   datasetPath: string;
-  type: 'csv' | 'image';
+  type: DataType;
+}
+
+export interface TrainingParametersWithDataType<TrainingType extends DataType>
+  extends TrainingRequestParameters {
+  type: TrainingType extends 'csv' ? 'csv' : 'image';
+  trainingOptions: TrainingType extends 'csv' ? CSVParams : ImageParams;
 }
 
 export type TrainingResponse = {
