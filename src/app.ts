@@ -16,9 +16,7 @@ app.post('/', async (req: Request<null, any, TrainingRequestParameters>, res: Re
     if (req.body.type == null || (req.body.type !== 'csv' && req.body.type !== 'image'))
       throw new Error('Invalid Data type');
     const {
-      data: {
-        training: { id: trainingId },
-      },
+      data: { id: trainingId },
     } = await createTrainingSession(req.body);
     await startTrainingSession(trainingId);
 
