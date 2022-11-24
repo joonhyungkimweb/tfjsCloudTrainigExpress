@@ -8,12 +8,12 @@ import {
 } from '@tensorflow/tfjs-node-gpu';
 
 const optimizers: { [key: string]: (learningRate: number) => Optimizer } = {
-  Adam: train.adam,
+  ADAM: train.adam,
   SGD: train.sgd,
-  Adagrad: train.adagrad,
-  Adadelta: train.adadelta,
-  Adamax: train.adamax,
-  RMSProp: train.rmsprop,
+  ADAGRAD: train.adagrad,
+  ADADELTA: train.adadelta,
+  ADAMAX: train.adamax,
+  RMSPROP: train.rmsprop,
 };
 
 export const compileOptimizer = (optimzer: string, learningRate: number) =>
