@@ -8,7 +8,7 @@ import { CSVMetaData } from '../@types/TrainingParams';
 const loadCSVDataset = async (datasetURL: string) => {
   const {
     data: [, ...data],
-  } = await parseCsvData((await getObject(datasetURL)).Body as Blob);
+  } = await parseCsvData((await getObject(datasetURL)).Body as NodeJS.ReadableStream);
   return data;
 };
 const isSelectedColumn = (columns: number[], index: number) => columns.includes(index);
