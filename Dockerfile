@@ -7,5 +7,5 @@ RUN npm i -g yarn
 RUN npm i -g pm2
 WORKDIR /usr/app
 COPY . . 
-RUN yarn
+RUN yarn build
 CMD [ "pm2-runtime", "dist/src/app.js" ]
