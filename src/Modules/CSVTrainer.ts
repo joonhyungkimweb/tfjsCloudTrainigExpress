@@ -1,20 +1,19 @@
 import { dispose } from '@tensorflow/tfjs-node-gpu';
-import { CSVParams } from '../@types/TrainingParams';
+import { TrainingParametersWithDataType } from '../@types/TrainingParams';
+import { errorOnTrainingSession, startPreprocessing, startTrainningProcess } from './APICalls';
 import { loadAndProcessCSVData } from './DataProcessor';
-import { getStatus, onError, onFinish, onStart, onTraining } from './DB';
 import { LoadModel } from './ModelLoader';
-import { createModelSaver } from './ModelSaver';
 import { compileOptimizer, trainModel } from './ModelTrainer';
+import { epochEndHandler, finishHandler } from './ModelTrainingCallBacks';
 
-export const trainCSVModel = async (params: CSVParams, trainingSeq: string) => {
+export const trainCSVModel = async (id: number, params: TrainingParametersWithDataType<'csv'>) => {
   try {
-    const trainingDataset = await loadAndProcessCSVData(
-      params.datasetPath,
-      params.xColumns,
-      params.yColumns
-    );
+    await startPreprocessing(id);
+    const { xColumns, yColumns } = params.trainingOptions;
+    const trainingDataset = await loadAndProcessCSVData(params.datasetPath, xColumns, yColumns);
     const model = await LoadModel(params.modelPath, params.weightsPath);
     const optimizer = compileOptimizer(params.optimizer, params.learningRate);
+    await startTrainningProcess(id);
     await trainModel(
       trainingDataset,
       model,
@@ -29,34 +28,8 @@ export const trainCSVModel = async (params: CSVParams, trainingSeq: string) => {
         shuffle: params.shuffle,
         validationSplit: params.validationSplit,
         callbacks: {
-          onEpochEnd: async (epoch, logs) => {
-            const prefix = `${params.userId}/trained-models/${params.modelName}/${trainingSeq}`;
-            const modelFileName = `${params.modelName}-epoch${epoch}`;
-
-            const currentStatus = await getStatus(trainingSeq!);
-            if (currentStatus == null || currentStatus === 'stopped') return;
-            await model.save(createModelSaver(prefix, modelFileName));
-
-            await onTraining(
-              trainingSeq,
-              Object.entries(logs!).reduce(
-                (acc, [key, value]) => ({ ...acc, [key]: { N: `${value}` } }),
-                {}
-              ),
-              {
-                modelPath: {
-                  S: `${modelFileName}.json`,
-                },
-                weightsPath: {
-                  S: `${modelFileName}.weights.bin`,
-                },
-              },
-              epoch + 1
-            );
-          },
-          onTrainEnd: async () => {
-            await onFinish(trainingSeq);
-          },
+          onEpochEnd: epochEndHandler(id, params.userId, model),
+          onTrainEnd: finishHandler(id),
         },
       }
     );
@@ -67,7 +40,6 @@ export const trainCSVModel = async (params: CSVParams, trainingSeq: string) => {
     console.error(error);
     let message = 'Unknown Error';
     if (error instanceof Error) message = error.message;
-    if (trainingSeq == null) return;
-    await onError(trainingSeq, message);
+    await errorOnTrainingSession(id, message);
   }
 };
