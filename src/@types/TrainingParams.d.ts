@@ -1,20 +1,3 @@
-export interface TrainingParams {
-  userId: string;
-  modelName: string;
-  type: 'image' | 'csv';
-  datasetPath: string;
-  modelPath: string;
-  weightsPath: string;
-  optimizer: string;
-  loss: string;
-  metrics: string;
-  learningRate: number;
-  epochs: number;
-  batchSize: number;
-  shuffle: boolean;
-  validationSplit: number;
-}
-
 export enum TrainingLossFunction {
   categoricalCrossentropy,
   sparseCategoricalCrossentropy,
@@ -36,28 +19,43 @@ export enum TrainingOptimizer {
   ADAMAX,
 }
 
-export interface CSVParams extends TrainingParams {
+export interface CSVParams {
   xColumns: number[];
   yColumns: number[];
 }
-export interface ImageParams extends TrainingParams {
+export interface ImageParams {
   width: number;
   height: number;
   channel: number;
   normalize: boolean;
 }
+
 export interface TrainingParameters {
   epochs: number;
   batchSize: number;
   learningRate: number;
-  loss: TrainingLossFunction;
-  metrics: TrainingMetrics;
-  optimizer: TrainingOptimizer;
+  loss: keyof typeof TrainingLossFunction;
+  metrics: keyof typeof TrainingMetrics;
+  optimizer: keyof typeof TrainingOptimizer;
   shuffle: boolean;
   trainingOptions: CSVParams | ImageParams;
   datasetId: number;
+  modelId: number;
+  validationSplit: number;
 }
 
+export interface TrainingRequestParameters extends TrainingParameters {
+  userId: string;
+  modelPath: string;
+  weightsPath: string;
+  datasetPath: string;
+  type: 'csv' | 'image';
+}
+
+export type TrainingResponse = {
+  id: number;
+  trainingStatus: TrainingStatus;
+};
 export interface TrainingEpochParameters {
   epochsDone: number;
   history: {
