@@ -61,8 +61,12 @@ export interface TrainingParametersWithDataType<TrainingType extends DataType>
 }
 
 export type TrainingResponse = {
-  id: number;
-  trainingStatus: TrainingStatus;
+  data: {
+    training: {
+      id: number;
+      trainingStatus: TrainingStatus;
+    };
+  };
 };
 export interface TrainingEpochParameters {
   epochsDone: number;
