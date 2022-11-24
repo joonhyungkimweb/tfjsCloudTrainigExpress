@@ -93,3 +93,5 @@ export interface CSVMetaData {
     filepath: string;
   };
 }
+
+export type ImageMetadata = { className: string; URL: string }[];
