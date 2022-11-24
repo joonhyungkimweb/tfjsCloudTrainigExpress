@@ -1,3 +1,4 @@
+import './utils/env';
 import express, { Express, json, Request, Response } from 'express';
 import cors from 'cors';
 import { TrainingParametersWithDataType, TrainingRequestParameters } from './@types/TrainingParams';
