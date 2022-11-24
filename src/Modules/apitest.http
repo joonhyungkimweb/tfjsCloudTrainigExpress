@@ -1,0 +1,51 @@
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+  "epochs": 10,
+  "batchSize": 32,
+  "learningRate": 0.001,
+  "loss": "sparseCategoricalCrossentropy",
+  "metrics": "accuracy",
+  "optimizer": "ADAM",
+  "shuffle": true,
+  "trainingOptions": {
+    "xColumns": [0,1,2,3],
+    "yColumns": [4]
+  },
+  "datasetId": 3,
+  "validationSplit": 0.1,
+  "userId": "test",
+  "modelId": 2,
+  "datasetPath" : "e9de27c6-6fd4-42b6-8818-1c868090461c/e34d3da3-906e-4af7-b36b-7348ce292fab.json",
+  "modelPath": "e9de27c6-6fd4-42b6-8818-1c868090461c/51cadb96-f75a-4c0d-99a4-272af12c4f53.json",
+  "weightsPath": "e9de27c6-6fd4-42b6-8818-1c868090461c/d40c8506-5847-4081-a56e-a976efa33ff5.weights.bin",
+  "type": "csv"
+}
+
+###
+POST http://localhost:8080
+Content-Type: application/json
+{
+  "epochs": 10,
+  "batchSize": 32,
+  "learningRate": 0.001,
+  "loss": "categoricalCrossentropy",
+  "metrics": "accuracy",
+  "optimizer": "ADAM",
+  "shuffle": true,
+  "trainingOptions": {
+    "height": 28,
+    "width": 28,
+    "channel": 1,
+    "normalize": true
+  },
+  "validationSplit": 0.1,
+  "userId": "test",
+  "datasetId": 5,
+  "modelId": 4,
+  "datasetPath" : "e9de27c6-6fd4-42b6-8818-1c868090461c/39e508ec-1ef6-4e8d-8209-ca231f7b2455.json",
+  "modelPath": "e9de27c6-6fd4-42b6-8818-1c868090461c/e556d63c-8375-44b8-8691-d281a595892b.json",
+  "weightsPath": "e9de27c6-6fd4-42b6-8818-1c868090461c/995210d4-aecb-491f-a5b9-ff854334e03e.weights.bin",
+  "type": "image"
+}
