@@ -6,7 +6,7 @@ import { LoadModel } from './ModelLoader';
 import { compileOptimizer, trainModel } from './ModelTrainer';
 import { epochEndHandler, finishHandler } from './ModelTrainingCallBacks';
 
-export const trainCSVModel = async (id: number, params: TrainingParametersWithDataType<'csv'>) => {
+export const trainCSVModel = async (id: number, params: TrainingParametersWithDataType<'TEXT'>) => {
   try {
     await startPreprocessing(id);
     const { xColumns, yColumns } = params.trainingOptions;

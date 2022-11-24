@@ -9,7 +9,7 @@ import { epochEndHandler, finishHandler } from './ModelTrainingCallBacks';
 
 export const trainImageModel = async (
   id: number,
-  params: TrainingParametersWithDataType<'image'>
+  params: TrainingParametersWithDataType<'IMAGE'>
 ) => {
   try {
     await startPreprocessing(id);

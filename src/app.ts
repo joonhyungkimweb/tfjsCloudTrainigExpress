@@ -13,7 +13,10 @@ const port = process.env.PORT ?? 8080;
 
 app.post('/', async (req: Request<null, any, TrainingRequestParameters>, res: Response) => {
   try {
-    if (req.body.type == null || (req.body.type !== 'csv' && req.body.type !== 'image'))
+    if (
+      req.body.dataType == null ||
+      (req.body.dataType !== 'TEXT' && req.body.dataType !== 'IMAGE')
+    )
       throw new Error('Invalid Data type');
     const {
       data: { id: trainingId },
@@ -21,10 +24,10 @@ app.post('/', async (req: Request<null, any, TrainingRequestParameters>, res: Re
     await startTrainingSession(trainingId);
 
     res.status(200).send();
-    if (req.body.type === 'csv')
-      await trainCSVModel(trainingId, req.body as TrainingParametersWithDataType<'csv'>);
-    if (req.body.type === 'image')
-      await trainImageModel(trainingId, req.body as TrainingParametersWithDataType<'image'>);
+    if (req.body.dataType === 'TEXT')
+      await trainCSVModel(trainingId, req.body as TrainingParametersWithDataType<'TEXT'>);
+    if (req.body.dataType === 'IMAGE')
+      await trainImageModel(trainingId, req.body as TrainingParametersWithDataType<'IMAGE'>);
   } catch (err) {
     console.error(err);
     console.log(new Date(), req.hostname);
