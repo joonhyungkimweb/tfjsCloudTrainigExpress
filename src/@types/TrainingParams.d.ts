@@ -68,9 +68,9 @@ export interface TrainingEpochParameters {
   epochsDone: number;
   history: {
     loss: number;
-    valLoss: number;
-    subMetric: number;
-    valSubMetric: number;
+    valLoss?: number;
+    subMetric?: number;
+    valSubMetric?: number;
   };
   modelFile: {
     fileName: string;
