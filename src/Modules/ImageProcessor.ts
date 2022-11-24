@@ -11,8 +11,9 @@ import {
 } from '@tensorflow/tfjs-node-gpu';
 import { Readable } from 'stream';
 import { streamToBuffer, streamToJSONObject } from './streamConverter';
+import { ImageMetadata } from '../@types/TrainingParams';
 
-const loadImageList = async (imageListURL: string): Promise<string[]> => {
+const loadImageList = async (imageListURL: string): Promise<ImageMetadata> => {
   const { Body } = await getObject(imageListURL);
   return streamToJSONObject(Body as Readable);
 };
@@ -43,8 +44,10 @@ const convertCanvasToTensor = (
       .div(normalize ? 255 : 1);
   });
 
-const makeOnehotLabels = (uniqueValues: (string | number)[], datas: (string | number)[]) => {
-  return datas.map((value) => uniqueValues.map((e) => +(value === e)));
+const makeOnehotLabels = (classNames: (string | number)[]) => {
+  const uniqueValues = Array.from(new Set(classNames)).sort();
+
+  return classNames.map((value) => uniqueValues.map((e) => +(value === e)));
 };
 
 export const loadAndProcessImageData = async (
@@ -55,27 +58,18 @@ export const loadAndProcessImageData = async (
   normalize: boolean
 ) => {
   const imageList = await loadImageList(datasetURL);
-  const uniqueValues = Array.from(
-    new Set(imageList.map((url) => url.split('/').slice(-2)[0]))
-  ).sort();
-
   util.shuffle(imageList);
 
   const loadedImages = await Promise.all(
-    imageList.map(async (url) =>
-      convertCanvasToTensor(await loadImageFile(url), width, height, channel, normalize)
+    imageList.map(async ({ URL }) =>
+      convertCanvasToTensor(await loadImageFile(URL), width, height, channel, normalize)
     )
   );
 
   const xs = stack(loadedImages);
   dispose(loadedImages);
 
-  const ys = tensor(
-    makeOnehotLabels(
-      uniqueValues,
-      imageList.map((url) => url.split('/').slice(-2)[0])
-    )
-  );
+  const ys = tensor(makeOnehotLabels(imageList.map(({ className }) => className)));
   return {
     xs,
     ys,
