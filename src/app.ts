@@ -1,24 +1,31 @@
 import express, { Express, json, Request, Response } from 'express';
 import cors from 'cors';
-import { CSVParams, ImageParams, TrainingParams } from './@types/TrainingParams';
+import { TrainingParametersWithDataType, TrainingRequestParameters } from './@types/TrainingParams';
 import { trainCSVModel } from './Modules/CSVTrainer';
 import { trainImageModel } from './Modules/ImageTrainer';
-import { onStart } from './Modules/DB';
+import { createTrainingSession, startTrainingSession } from './Modules/APICalls';
 
 const app: Express = express();
 app.use(cors());
 app.use(json());
 const port = process.env.PORT ?? 8080;
 
-app.post('/', async (req: Request<null, any, TrainingParams>, res: Response) => {
+app.post('/', async (req: Request<null, any, TrainingRequestParameters>, res: Response) => {
   try {
     if (req.body.type == null || (req.body.type !== 'csv' && req.body.type !== 'image'))
       throw new Error('Invalid Data type');
-    const trainingSeq = `training-${+new Date()}`;
-    await onStart(req.body, trainingSeq);
+    const {
+      data: {
+        training: { id: trainingId },
+      },
+    } = await createTrainingSession(req.body);
+    await startTrainingSession(trainingId);
+
     res.status(200).send();
-    if (req.body.type === 'csv') await trainCSVModel(req.body as CSVParams, trainingSeq);
-    if (req.body.type === 'image') await trainImageModel(req.body as ImageParams, trainingSeq);
+    if (req.body.type === 'csv')
+      await trainCSVModel(trainingId, req.body as TrainingParametersWithDataType<'csv'>);
+    if (req.body.type === 'image')
+      await trainImageModel(trainingId, req.body as TrainingParametersWithDataType<'image'>);
   } catch (err) {
     console.error(err);
     console.log(new Date(), req.hostname);
