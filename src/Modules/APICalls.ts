@@ -1,6 +1,9 @@
 import fetch from 'cross-fetch';
-import { TrainingEpochParameters, TrainingParameters } from '../@types/TrainingParams';
-import { getObject } from '../Modules/Storage';
+import {
+  TrainingEpochParameters,
+  TrainingParameters,
+  TrainingResponse,
+} from '../@types/TrainingParams';
 
 const TRAINING_ENDPOINT = 'https://api.nocodingai.com/training';
 const STATUS_ENDPOINT = `${TRAINING_ENDPOINT}/status`;
@@ -34,8 +37,8 @@ const updateTrainingStatus = async (
     body: JSON.stringify({ status, ...options }),
   });
 
-export const createTrainingSession = (modelId: number, TrainingParameters: TrainingParameters) =>
-  fetchWithErrorHandler(`${TRAINING_ENDPOINT}/${modelId}`, {
+export const createTrainingSession = (TrainingParameters: TrainingParameters) =>
+  fetchWithErrorHandler<TrainingResponse>(`${TRAINING_ENDPOINT}/${TrainingParameters.modelId}`, {
     method: 'POST',
     body: JSON.stringify(TrainingParameters),
   });
@@ -43,13 +46,8 @@ export const createTrainingSession = (modelId: number, TrainingParameters: Train
 export const startTrainingSession = (trainingId: number) =>
   updateTrainingStatus(trainingId, 'start');
 
-export const preprocessAndFetchMetadata = async (trainingId: number, datasetId: number) => {
-  const {
-    data: { datasetPath },
-  } = await updateTrainingStatus(trainingId, 'preprocessing', { datasetId });
-
-  return getObject(datasetPath);
-};
+export const startPreprocessing = async (trainingId: number) =>
+  updateTrainingStatus(trainingId, 'preprocessing');
 
 export const startTrainningProcess = (trainingId: number) =>
   updateTrainingStatus(trainingId, 'training');
