@@ -10,18 +10,11 @@ import {
   dispose,
 } from '@tensorflow/tfjs-node-gpu';
 import { Readable } from 'stream';
-
-const streamToBuffer = (stream: Readable) =>
-  new Promise<Buffer>((resolve, reject) => {
-    const chunks: Uint8Array[] = [];
-    stream.on('data', (chunk) => chunks.push(chunk));
-    stream.on('error', reject);
-    stream.on('end', () => resolve(Buffer.concat(chunks)));
-  });
+import { streamToBuffer, streamToJSONObject } from './streamConverter';
 
 const loadImageList = async (imageListURL: string): Promise<string[]> => {
   const { Body } = await getObject(imageListURL);
-  return JSON.parse((await streamToBuffer(Body as Readable)).toString('utf-8'));
+  return streamToJSONObject(Body as Readable);
 };
 
 const loadImageFile = async (imageURL: string) => {
