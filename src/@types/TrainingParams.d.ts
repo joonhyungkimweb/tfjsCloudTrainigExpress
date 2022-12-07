@@ -37,10 +37,12 @@ interface StableDiffusionParams {
   modelName: string;
   placeholderToken: string;
   initializerToken: string;
+  whatToTeach: string;
 }
 
 export interface TrainingParameters {
   epochs: number;
+  batchSize: number;
   learningRate: number;
   datasetId: number;
   modelId: number;
@@ -48,7 +50,6 @@ export interface TrainingParameters {
 
 export interface TfjsParams extends TrainingParameters {
   loss: keyof typeof TrainingLossFunction;
-  batchSize: number;
   dataType: DataType;
   validationSplit: number;
   trainingOptions: CSVParams | ImageParams;
@@ -78,7 +79,6 @@ export interface StableDiffusionRequestParameters
   extends StableDiffusionParams,
     TrainingRequestParameters {
   platform: 'stableDiffusion';
-  trainingOptions: StableDiffusionParams;
 }
 
 export type TrainingResponse = {
