@@ -32,6 +32,13 @@ interface ImageParams {
   normalize: boolean;
 }
 
+interface StableDiffusionParams {
+  imageUrlDirectory: string;
+  modelName: string;
+  placeholderToken: string;
+  initializerToken: string;
+}
+
 export interface TrainingParameters {
   epochs: number;
   learningRate: number;
@@ -58,12 +65,20 @@ export interface TfjsRequestParameters extends TfjsParams, TrainingRequestParame
   modelPath: string;
   weightsPath: string;
   datasetPath: string;
+  platform: 'tfjs';
 }
 
 export interface TfjsParametersWithDataType<TrainingType extends DataType>
   extends TfjsRequestParameters {
   dataType: TrainingType extends 'TEXT' ? 'TEXT' : 'IMAGE';
   trainingOptions: TrainingType extends 'TEXT' ? CSVParams : ImageParams;
+}
+
+export interface StableDiffusionRequestParameters
+  extends StableDiffusionParams,
+    TrainingRequestParameters {
+  platform: 'stableDiffusion';
+  trainingOptions: StableDiffusionParams;
 }
 
 export type TrainingResponse = {
