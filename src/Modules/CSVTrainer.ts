@@ -1,12 +1,12 @@
 import { dispose } from '@tensorflow/tfjs-node-gpu';
-import { TrainingParametersWithDataType } from '../@types/TrainingParams';
+import { TfjsParametersWithDataType } from '../@types/TrainingParams';
 import { errorOnTrainingSession, startPreprocessing, startTrainningProcess } from './APICalls';
 import { loadAndProcessCSVData } from './DataProcessor';
 import { LoadModel } from './ModelLoader';
 import { compileOptimizer, trainModel } from './ModelTrainer';
 import { epochEndHandler, finishHandler } from './ModelTrainingCallBacks';
 
-export const trainCSVModel = async (id: number, params: TrainingParametersWithDataType<'TEXT'>) => {
+export const trainCSVModel = async (id: number, params: TfjsParametersWithDataType<'TEXT'>) => {
   try {
     await startPreprocessing(id);
     const { xColumns, yColumns } = params.trainingOptions;

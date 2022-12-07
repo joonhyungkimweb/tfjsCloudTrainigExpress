@@ -1,5 +1,5 @@
 import { dispose } from '@tensorflow/tfjs-node-gpu';
-import { ImageParams, TrainingParametersWithDataType } from '../@types/TrainingParams';
+import { ImageParams, TfjsParametersWithDataType } from '../@types/TrainingParams';
 import { errorOnTrainingSession, startPreprocessing, startTrainningProcess } from './APICalls';
 import { loadAndProcessImageData } from './ImageProcessor';
 import { LoadModel } from './ModelLoader';
@@ -7,10 +7,7 @@ import { createModelSaver } from './ModelSaver';
 import { compileOptimizer, trainModel } from './ModelTrainer';
 import { epochEndHandler, finishHandler } from './ModelTrainingCallBacks';
 
-export const trainImageModel = async (
-  id: number,
-  params: TrainingParametersWithDataType<'IMAGE'>
-) => {
+export const trainImageModel = async (id: number, params: TfjsParametersWithDataType<'IMAGE'>) => {
   try {
     await startPreprocessing(id);
     const { width, height, channel, normalize } = params.trainingOptions;
