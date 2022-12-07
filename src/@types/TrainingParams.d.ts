@@ -34,28 +34,34 @@ interface ImageParams {
 
 export interface TrainingParameters {
   epochs: number;
-  batchSize: number;
   learningRate: number;
+  datasetId: number;
+  modelId: number;
+}
+
+export interface TfjsParams extends TrainingParameters {
   loss: keyof typeof TrainingLossFunction;
+  batchSize: number;
+  dataType: DataType;
+  validationSplit: number;
+  trainingOptions: CSVParams | ImageParams;
   metrics: keyof typeof TrainingMetrics;
   optimizer: keyof typeof TrainingOptimizer;
   shuffle: boolean;
-  trainingOptions: CSVParams | ImageParams;
-  datasetId: number;
-  modelId: number;
-  validationSplit: number;
-  dataType: DataType;
 }
 
 export interface TrainingRequestParameters extends TrainingParameters {
   userId: string;
+  platform: 'tfjs' | 'stableDiffusion';
+}
+export interface TfjsRequestParameters extends TfjsParams, TrainingRequestParameters {
   modelPath: string;
   weightsPath: string;
   datasetPath: string;
 }
 
-export interface TrainingParametersWithDataType<TrainingType extends DataType>
-  extends TrainingRequestParameters {
+export interface TfjsParametersWithDataType<TrainingType extends DataType>
+  extends TfjsRequestParameters {
   dataType: TrainingType extends 'TEXT' ? 'TEXT' : 'IMAGE';
   trainingOptions: TrainingType extends 'TEXT' ? CSVParams : ImageParams;
 }
