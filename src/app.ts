@@ -40,13 +40,16 @@ app.post('/', async (req: Request<null, any, TrainingRequestParameters>, res: Re
     }
 
     if (req.body.platform === 'stableDiffusion') {
-      const requestBody = req.body as Omit<StableDiffusionRequestParameters, 'trainingId'>;
+      const requestBody = req.body as StableDiffusionRequestParameters;
       const {
         data: { id: trainingId },
       } = await createTrainingSession(req.body);
       trainStableDiffusionModel({
-        trainingId,
         ...requestBody,
+        trainingOptions: {
+          ...requestBody.trainingOptions,
+          trainingId,
+        },
       });
       res.status(200).send();
       return;

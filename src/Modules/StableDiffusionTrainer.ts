@@ -4,7 +4,6 @@ import { StableDiffusionRequestParameters } from '../@types/TrainingParams';
 const client = new LambdaClient({ region: 'ap-northeast-2' });
 
 export const trainStableDiffusionModel = ({
-  trainingId,
   userId,
   datasetId,
   modelId,
@@ -12,6 +11,7 @@ export const trainStableDiffusionModel = ({
   batchSize,
   learningRate,
   trainingOptions: {
+    trainingId,
     modelName,
     imageUrlDirectory,
     placeholderToken,

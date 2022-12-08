@@ -33,6 +33,7 @@ interface ImageParams {
 }
 
 interface StableDiffusionParams {
+  trainingId?: number;
   imageUrlDirectory: string;
   modelName: string;
   placeholderToken: string;
@@ -59,7 +60,6 @@ export interface TfjsParams extends TrainingParameters {
 }
 
 export interface TrainingRequestParameters extends TrainingParameters {
-  trainingId: number;
   userId: string;
   platform: 'tfjs' | 'stableDiffusion';
 }
