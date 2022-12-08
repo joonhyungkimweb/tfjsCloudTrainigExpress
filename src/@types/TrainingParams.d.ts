@@ -46,19 +46,20 @@ export interface TrainingParameters {
   learningRate: number;
   datasetId: number;
   modelId: number;
+  trainingOptions: CSVParams | ImageParams | StableDiffusionParams;
 }
 
 export interface TfjsParams extends TrainingParameters {
   loss: keyof typeof TrainingLossFunction;
   dataType: DataType;
   validationSplit: number;
-  trainingOptions: CSVParams | ImageParams;
   metrics: keyof typeof TrainingMetrics;
   optimizer: keyof typeof TrainingOptimizer;
   shuffle: boolean;
 }
 
 export interface TrainingRequestParameters extends TrainingParameters {
+  trainingId: number;
   userId: string;
   platform: 'tfjs' | 'stableDiffusion';
 }
@@ -75,10 +76,9 @@ export interface TfjsParametersWithDataType<TrainingType extends DataType>
   trainingOptions: TrainingType extends 'TEXT' ? CSVParams : ImageParams;
 }
 
-export interface StableDiffusionRequestParameters
-  extends StableDiffusionParams,
-    TrainingRequestParameters {
+export interface StableDiffusionRequestParameters extends TrainingRequestParameters {
   platform: 'stableDiffusion';
+  trainingOptions: StableDiffusionParams;
 }
 
 export type TrainingResponse = {
