@@ -2,6 +2,7 @@ import './utils/env';
 import express, { Express, json, Request, Response } from 'express';
 import cors from 'cors';
 import {
+  StableDiffusionRequestParameters,
   TfjsParametersWithDataType,
   TfjsRequestParameters,
   TrainingRequestParameters,
@@ -9,6 +10,7 @@ import {
 import { trainCSVModel } from './Modules/CSVTrainer';
 import { trainImageModel } from './Modules/ImageTrainer';
 import { createTrainingSession, startTrainingSession } from './Modules/APICalls';
+import { trainStableDiffusionModel } from './Modules/StableDiffusionTrainer';
 
 const app: Express = express();
 app.use(cors());
@@ -34,7 +36,22 @@ app.post('/', async (req: Request<null, any, TrainingRequestParameters>, res: Re
         await trainCSVModel(trainingId, req.body as TfjsParametersWithDataType<'TEXT'>);
       if (requestBody.dataType === 'IMAGE')
         await trainImageModel(trainingId, req.body as TfjsParametersWithDataType<'IMAGE'>);
+      return;
     }
+
+    if (req.body.platform === 'stableDiffusion') {
+      const requestBody = req.body as Omit<StableDiffusionRequestParameters, 'trainingId'>;
+      const {
+        data: { id: trainingId },
+      } = await createTrainingSession(req.body);
+      trainStableDiffusionModel({
+        trainingId,
+        ...requestBody,
+      });
+      res.status(200).send();
+      return;
+    }
+    res.status(400).send();
   } catch (err) {
     console.error(err);
     console.log(new Date(), req.hostname);
