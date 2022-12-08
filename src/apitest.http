@@ -26,6 +26,7 @@ Content-Type: application/json
 ###
 POST http://localhost:8080
 Content-Type: application/json
+
 {
   "epochs": 10,
   "batchSize": 32,
@@ -47,5 +48,28 @@ Content-Type: application/json
   "datasetPath" : "e9de27c6-6fd4-42b6-8818-1c868090461c/39e508ec-1ef6-4e8d-8209-ca231f7b2455.json",
   "modelPath": "e9de27c6-6fd4-42b6-8818-1c868090461c/e556d63c-8375-44b8-8691-d281a595892b.json",
   "weightsPath": "e9de27c6-6fd4-42b6-8818-1c868090461c/995210d4-aecb-491f-a5b9-ff854334e03e.weights.bin",
-  "type": "image"
+  "dataType": "IMAGE",
+  "platform":"tfjs"
+}
+
+
+###
+POST http://localhost:8080
+Content-Type: application/json
+
+{
+  "datasetId": 2,
+  "epochs": 10,
+  "learningRate": 0.001,
+  "modelId": 96,
+  "userId": "e9de27c6-6fd4-42b6-8818-1c868090461c",
+  "batchSize": 1,
+  "platform": "stableDiffusion",
+  "trainingOptions" : {
+    "imageUrlDirectory": "e9de27c6-6fd4-42b6-8818-1c868090461c/95806d5d-0476-4c8b-9b6d-c15f63ebfdbe.json",
+    "modelName": "StableDiffusion",
+    "placeholderToken": "a dog eating dog food",
+    "initializerToken": "eating",
+    "whatToTeach": "object"
+  }
 }
