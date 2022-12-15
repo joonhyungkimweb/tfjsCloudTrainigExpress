@@ -4,8 +4,6 @@ import path from 'path';
 
 export const createModelSaver = (modelPath: string, weightsPath: string): io.IOHandler => ({
   save: async (modelArtifacts) => {
-    console.log(path.basename(weightsPath));
-
     await putObject(
       modelPath,
       JSON.stringify({
